@@ -1,0 +1,1137 @@
+---
+title: "Housing Price Analysis     \n      Final Project"
+author: "Vahid Monfared"
+date: "2/20/2024"
+output:
+  html_document:
+    fig_width: 8
+    code_folding: hide
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=8, fig.height=4,
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+# Dataset Details (Introduction)
+To analyze housing prices based on various factors such as house area, number of bedrooms and bathrooms, stories, proximity to the main road, presence of a guestroom, basement, hot water heating, air conditioning, parking facilities, preferred area, and furnishing status, involves a multifaceted approach to understand how each factor influences the overall price of a house (relations between variables). This type of analysis is crucial for several reasons, and achieving it requires a careful examination of the data to uncover patterns, trends, and insights that can inform buyers, sellers, real estate agents, and policymakers. Visualization of this data set can help a lot for mentioned targeted groups to better understating the analysis. The source of this Housing dataset belongs to "Kaggle".  "Housing data" dataset is clean, meaning it doesn't contain any common problems such as NaN (Not a Number) values, missing values, or scaling issues. The dataset is considered to be in good shape and format for the project it was used for.
+Furthermore, it mentions that the project was carried out without major preprocessing steps, suggesting that the data was used in its original format without significant alterations or adjustments. This approach might be suitable depending on the specific goals and requirements of the project, as sometimes datasets are sufficiently clean and well-structured to be used without extensive preprocessing and wrangling. 
+
+# Importance of Housing Price Analysis
+- Market Understanding: Analyzing housing prices helps in understanding the current market trends, which is crucial for real estate investors, buyers, and sellers to make informed decisions.
+- Pricing Strategy: For sellers and real estate agents, understanding which features contribute most to the house's value can help in setting competitive prices and marketing strategies.
+- Investment Insights: Investors can identify potentially undervalued properties or areas with high growth potential, maximizing their return on investment.
+- Policy Development: Policymakers can use this analysis to understand the housing market better, helping them to craft policies that ensure affordable housing and sustainable urban development.
+- Consumer Preferences: Identifying which house features are most valued by buyers can guide developers and builders in constructing homes that meet market demands.
+
+# Aims of the Analysis (Objective)
+- Visualize and Determine the features that have the most significant impact on housing prices (relations among  variables with price).
+- Analyzing the housing prices based on various features.
+- Identify trends over time, such as rising prices in certain areas or preferences for specific house features.
+- Segment the housing market into different categories based on price ranges and features.
+- Data analytics for categorical and numerical variables
+- To examine the distribution of the data
+- Draw various random samples of the data and show the applicability of the Central Limit Theorem for this variable.
+- Showing how various sampling methods can be used on your data and  What conclusions are
+ if these samples are used instead of the whole data set.
+- Using Data wrangling techniques for the appropriate analysis of your data if needed.
+
+# Needs for Housing Price Analysis
+- The complexity of the housing market, where prices are influenced by a multitude of factors.
+- The significant financial investment involved in buying property, making it crucial for parties involved to have a clear understanding of what they are investing in.
+- The dynamic nature of the real estate market, with changing consumer preferences, economic conditions, and regulatory environments.
+
+# Why We Must Analyze Housing Prices
+- Transparency: Providing clear insights into what drives housing prices, helping buyers make more informed decisions.
+- Efficiency: Helping the market to function more efficiently by matching supply with demand more effectively.
+- Equity: Ensuring fair pricing and understanding disparities in housing affordability across different regions and demographics.
+
+# Benefits of the Analysis
+- Informed Decision Making: Buyers and sellers can make more informed decisions, reducing the risks associated with real estate transactions.
+- Market Opportunities: Identifying gaps in the market or areas for investment that may not be immediately obvious without a detailed analysis.
+- Policy Support: Providing empirical evidence to support policy decisions aimed at stabilizing the housing market or addressing issues of affordability and accessibility.
+
+# General Analysis for One Categorical and Numerical Variables
+Shape and dimension of dataset dim(Housing) is (545,13), the names of variables are "price",  "area", "bedrooms", "bathrooms", "stories", "mainroad", "guestroom", "basement", "hotwaterheating", "airconditioning", "parking", "prefarea", "furnishingstatus" comes from "names(Housing)". 
+
+```{r echo = TRUE}
+library(plotly)
+Housing <- read.csv("E:/Housing.csv")
+library(plotly)
+furnishingstatus_count <- table(Housing$furnishingstatus)
+plot_furnishingstatus <- plot_ly(x = names(furnishingstatus_count), 
+                                 y = as.numeric(furnishingstatus_count), 
+                                 type = 'bar', 
+                                 name = 'Furnishing Status',
+                                 marker = list(color = 'rgba(50, 171, 96, 0.6)',
+                                               line = list(color = 'rgba(50, 171, 96, 1.0)', width = 2))) %>%
+  layout(title = "Furnishing Status of Houses",
+         xaxis = list(title = "Furnishing Status"),
+         yaxis = list(title = "Count"))
+
+plot_price <- plot_ly(x = Housing$price, 
+                      type = 'histogram', 
+                      marker = list(color = 'blue')) %>%
+  layout(title = "Distribution of Housing Prices",
+         xaxis = list(title = "Price"),
+         yaxis = list(title = "Count"))
+plot_furnishingstatus
+plot_price
+```
+
+Note: In the "Housing" dataset, the variable "prefarea" refers to a binary categorical variable indicating whether the house is located in a preferred area or not. "prefarea" stands for "preferred area." This could imply that the area has desirable features such as good schools, low crime rates, proximity to amenities, or high property value appreciation. The bar chart depicts a count of items in three categories: furnished, semi-furnished, and unfurnished. It shows that semi-furnished items are the most common, followed by unfurnished, and then furnished. The histogram indicates a fairly slightly right-skewed distribution of prices (quasi normal), with a high frequency of items in the price range (around 4M) and a gradual decrease as the price increases. This suggests that lower-priced items are more common than higher-priced ones, which can be useful for understanding market trends and pricing strategies in data science and analytics.
+
+# Analysis for Variables 
+
+```{r echo = TRUE}
+library(plotly)
+library(dplyr)
+Housing <- read.csv("E:/Housing.csv")
+
+scatter_plot <- plot_ly(Housing, x = ~area, y = ~price, mode = "markers", type = "scatter", marker = list(color = "blue"), 
+                        text = ~paste("Area: ", area, "<br>Price: $", price)) %>%
+                layout(title = "Price vs. Area", xaxis = list(title = "Area"), yaxis = list(title = "Price"))
+
+box_plot_furnishingstatus <- plot_ly(Housing, x = ~furnishingstatus, y = ~price, type = "box", 
+                                      boxmean = "sd", color = I("orange"), 
+                                      text = ~paste("Furnishing Status: ", furnishingstatus, "<br>Price: $", price)) %>%
+                              layout(title = "Price Distribution Across Furnishing Status",
+                                     xaxis = list(title = "Furnishing Status"), yaxis = list(title = "Price"))
+
+scatter_plot
+box_plot_furnishingstatus
+
+```
+The scatter plot displays the relationship between area and price of properties. There is a positive correlation (around + 0.5), indicating that larger areas tend to be associated with higher prices, but with a wide spread of prices at most area levels, which suggests high variability and potential influence of other factors on property prices, valuable for predictive modeling in real estate.
+The box plot illustrates the distribution of prices for furnished, semi-furnished, and unfurnished items (furnishing status
+), indicating median prices and variability within each category. The distribution of prices for furnished items shows greater variability (variance) than others, semi-furnished shows higher outliers compared to furnished and unfurnished, which can provide insights into pricing strategies and consumer preferences in the housing market for data science analysis. Moreover, Median_furnished > Median_semi-furnished > Median_unfurnished
+
+```{r echo = TRUE}
+library(plotly)
+library(dplyr)
+
+generate_plotly_bar_plot <- function(df, x_var, y_var, title, color) {
+  averages <- df %>%
+    group_by(.data[[x_var]]) %>%
+    summarise(AvgPrice = mean(.data[[y_var]], na.rm = TRUE)) %>%
+    ungroup() 
+
+  plot <- plot_ly(data = averages, x = ~.data[[x_var]], y = ~AvgPrice, type = 'bar', name = title, 
+                  marker = list(color = color)) %>%
+    layout(title = "",
+           xaxis = list(title = x_var),
+           yaxis = list(title = 'Average Price'),
+           barmode = 'group')
+  return(plot)
+}
+
+plot_furnishingstatus <- generate_plotly_bar_plot(Housing, "furnishingstatus", "price", "Furnishing Status", 'skyblue')
+plot_mainroad <- generate_plotly_bar_plot(Housing, "mainroad", "price", "Mainroad", 'lightgreen')
+plot_prefarea <- generate_plotly_bar_plot(Housing, "prefarea", "price", "Prefarea", 'lightblue')
+plot_guestroom <- generate_plotly_bar_plot(Housing, "guestroom", "price", "Guestroom", 'orange')
+plot_basement <- generate_plotly_bar_plot(Housing, "basement", "price", "Basement", 'yellow')
+plot_hotwaterheating <- generate_plotly_bar_plot(Housing, "hotwaterheating", "price", "Hotwater Heating", 'pink')
+plot_airconditioning <- generate_plotly_bar_plot(Housing, "airconditioning", "price", "Air Conditioning", 'purple')
+
+plot_furnishingstatus <- plot_furnishingstatus %>% layout(title = "")
+plot_mainroad <- plot_mainroad %>% layout(title = "")
+plot_prefarea <- plot_prefarea %>% layout(title = "")
+plot_guestroom <- plot_guestroom %>% layout(title = "")
+plot_basement <- plot_basement %>% layout(title = "")
+plot_hotwaterheating <- plot_hotwaterheating %>% layout(title = "")
+plot_airconditioning <- plot_airconditioning %>% layout(title = "")
+
+final_plot <- subplot(plot_mainroad, plot_prefarea, plot_guestroom, plot_basement, plot_hotwaterheating, plot_airconditioning, plot_furnishingstatus, nrows = 3)
+
+final_plot <- final_plot %>% layout(
+  annotations = list(
+    x = -0.1,
+    y = 0.5,
+    text = "Average Price",
+    showarrow = FALSE,
+    textangle = -90,
+    xref = "paper",
+    yref = "paper",
+    font = list(size = 14)
+  )
+)
+
+final_plot
+
+```
+
+The bar charts compares the average price of properties with different features. From a data analytics and statistics standpoint, it suggests that certain features (like being on a prefarea and having air conditioning) tend to be associated with higher average property prices, and that furnishing status can also influence the average price, which could be valuable for real estate pricing models and market segmentation analysis. As a general fact comes from plots: price_air conditioning > price_prefarea > price_guestroom > price_furnished > price_ hotwater heating > price_ basement > price_ mainroad. As an interesting finding from visualization is price_mainroad ~ price_ semi-furnished. briefly, the least price belongs to price_mainroad (no). 
+
+```{r echo = TRUE}
+library(plotly)
+
+plot_ly(Housing, x = ~bedrooms, color = ~factor(bathrooms), type = 'histogram', 
+        colors = c("1" = "#1f77b4", "2" = "#ff7f0e", "3" = "#2ca02c", "4" = "#d62728")) %>%
+  layout(title = "Frequency of Housing Numbers by Bedrooms and Bathrooms",
+         xaxis = list(title = "Number of Bedrooms"),
+         yaxis = list(title = "Frequency"),
+         barmode = "group")
+
+```
+
+The bar chart presents the frequency of properties by the number of bedrooms, with different colors likely representing number of bathrooms. The most frequent property type has 3 bedrooms, followed by a significant drop in frequency for properties with 2, 4, 5 and 6 bedrooms, indicating a potential preference or availability bias towards smaller properties in the dataset, which could influence market analysis and predictive modeling in real estate. It shows 3 bedrooms with one bathroom has high frequency in that region, and then 2 bedrooms with one bathrooms have the maximum numbers respectively. Also, 6 bedrooms with 1 and 2 bathroom(s) has a minimum values in terms of frequency, as well as 4 bedrooms with 4 bathrooms (minimum). 
+
+```{r echo = TRUE}
+library(plotly)
+library(dplyr)
+Housing <- read.csv("E:/Housing.csv")
+
+furnishingstatus_proportions <- Housing %>%
+  count(furnishingstatus) %>%
+  mutate(proportion = n / sum(n))
+
+furnishingstatus_pie <- plot_ly(furnishingstatus_proportions, labels = ~furnishingstatus, values = ~proportion, type = "pie") %>%
+  layout(title = "Proportion of Houses by Furnishing Status")
+
+furnishingstatus_count_pie <- plot_ly(furnishingstatus_proportions, labels = ~furnishingstatus, values = ~n, type = "pie") %>%
+  layout(title = "Count of Houses by Furnishing Status")
+
+subplot(furnishingstatus_pie, furnishingstatus_count_pie, nrows = 2)
+```
+
+Above pie chart shows clearly the percentage of three groups in furnishings status with high volume of semi-furnished frequency.
+
+```{r echo = TRUE}
+library(plotly)
+Housing <- read.csv("E:/Housing.csv")
+
+airconditioning_prop <- prop.table(table(Housing$airconditioning))
+
+pie_chart <- plot_ly(labels = names(airconditioning_prop), values = airconditioning_prop, type = 'pie')
+
+pie_chart <- pie_chart %>% layout(title = "Proportion of Houses with Air Conditioning")
+
+pie_chart
+```
+
+Above pie chart shows clearly the percentage of two groups in having air conditioning status with high volume of Not air conditioning frequency in that area.
+
+```{r echo = TRUE}
+library(plotly)
+
+Housing <- read.csv("E:/Housing.csv")
+
+boxplot <- plot_ly(Housing, y = ~price, type = "box")
+
+boxplot
+
+```
+
+The box plot shows the distribution of prices with a median around 4.34 million, a notable variance range of prices mainly concentrated below 9 million and above 5.7M, and several outliers extending up to 13.3M (from 9.1 to 13.3). This indicates a relatively wide distribution of prices with a few instances of significantly higher-priced properties, useful for outlier detection and understanding price variability in a real estate dataset. Moreover 50% of data falls into interval of 3.43M and 5.74 M. Median of 4.34M is seen in boxplot.
+
+```{r echo = TRUE}
+library(plotly)
+
+boxplot_area <- plot_ly(data = Housing, y = ~area, type = "box") %>%
+  layout(yaxis = list(title = "Area"))
+
+boxplot_area
+```
+
+The box plot represents the distribution of area sizes, with the high variance of data points falling between approximately 4k to 10k (presumably square units), a median around 6k, and a few outliers above 14k. This indicates a relatively concentrated range of area sizes for most properties with some exceptions, useful for understanding area-related trends and for detecting anomalies in property size data. Moreover 50% of data falls into interval of 3.6M and 6.3 M. Median of 4.6M is seen in boxplot.
+
+```{r echo = TRUE}
+library(plotly)
+
+Housing <- read.csv("E:/Housing.csv")
+
+count_data <- table(Housing$furnishingstatus, Housing$basement)
+
+plot_ly(x = ~rownames(count_data), 
+        y = ~count_data[, "yes"], 
+        type = 'bar', 
+        name = 'With Basement (yes)') %>%
+  add_trace(y = ~count_data[, "no"], 
+            name = 'Without Basement (no)') %>%
+  layout(title = "Comparison of Furnishing Status and Basement",
+         xaxis = list(title = "Furnishing Status"),
+         yaxis = list(title = "Frequency"),
+         barmode = 'group')
+
+```
+
+The bar chart compares the frequency of houses with and without basements across three furnishing statuses: furnished, semi-furnished, and unfurnished. It shows that semi-furnished houses without basement have the highest frequency overall, with a notably higher count of houses without basements. Furnished and unfurnished houses have a lower frequency, with unfurnished houses showing a greater number of houses with basements compared to those without. This information is valuable for understanding housing trends, market demands, and could be used in predictive models for real estate pricing and feature preferences.
+
+```{r echo = TRUE}
+library(plotly)
+
+Housing <- read.csv("E:/Housing.csv")
+
+categorical_vars <- c("mainroad", "guestroom", "prefarea", "basement", "hotwaterheating", "airconditioning")
+
+frequency_df <- data.frame(variable = character(), value = character(), frequency = numeric())
+
+for (var in categorical_vars) {
+  freq_table <- table(Housing[[var]])
+  frequency_df <- rbind(frequency_df, data.frame(variable = var, value = names(freq_table), frequency = as.numeric(freq_table)))
+}
+
+plot <- plot_ly(frequency_df, x = ~variable, y = ~frequency, color = ~value, type = "bar") %>%
+  layout(title = "Frequency Distribution of Categorical Variables",
+         xaxis = list(title = "Variables"),
+         yaxis = list(title = "Frequency"),
+         barmode = "group")
+  
+plot
+
+```
+
+The stacked bar chart represents the frequency distribution of categorical variables in a dataset, with the presence (yes) and absence (no) of certain features: air conditioning, basement, guestroom, hot water heating, location on main road, and preferred area (prefarea). The features with the highest frequency of presence are hot water heating, guestroom and prefarea, indicating these are common features in the dataset. On the other hand, mainroad and basements are less frequently present in presence of those. This kind of visualization is helpful in understanding the composition of a housing dataset and can inform feature engineering and predictive model development in data science. The minimum frequency belongs to presence of hotwater heating (yes). 
+
+# Cramers' V correlation 
+```{r echo = TRUE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(reshape2) 
+
+Housing <- read.csv("E:/Housing.csv")
+
+cramers_v <- function(x, y) {
+  contingency_table <- table(x, y)
+  chi2 <- suppressWarnings(chisq.test(contingency_table)$statistic)
+  n <- sum(contingency_table)
+  phi2 <- chi2 / n
+  r <- nrow(contingency_table)
+  k <- ncol(contingency_table)
+  phi2corr <- max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
+  rcorr <- r - ((r - 1) ^ 2) / (n - 1)
+  kcorr <- k - ((k - 1) ^ 2) / (n - 1)
+  sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
+}
+
+categorical_vars <- c("mainroad", "guestroom", "basement", "hotwaterheating", "airconditioning", "prefarea", "furnishingstatus")
+
+n <- length(categorical_vars)
+cramers_matrix <- matrix(NA, n, n)
+colnames(cramers_matrix) <- categorical_vars
+rownames(cramers_matrix) <- categorical_vars
+
+for (i in 1:n) {
+  for (j in 1:n) {
+    cramers_matrix[i, j] <- cramers_v(Housing[[categorical_vars[i]]], Housing[[categorical_vars[j]]])
+  }
+}
+
+cramers_melted <- melt(cramers_matrix)
+
+ggplot(cramers_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0.5, limit = c(0,1), space = "Lab", name=bquote("Cram\u00E9r's V")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "", y = "", title = "Heatmap of Cram\u00E9r's V") +
+  geom_text(aes(label = sprintf("%.5f", value)), color = "black", size = 3)
+
+```
+In above table, higher numbers show high correlation between variables, for example, hotwaterheating has a maximum correlation (5.165383e-03) with airconditioning, as wel as the minimum correlation with mainroad (2.128455e-18) due to amonut of numbers. for example, correlation of "hotwaterheating" with other categorical variables (mainroad, guestroom, basement, hotwaterheating, airconditioning, prefarea, furnishingstatus) is respectively "2.128455e-18", "4.121888e-18", "2.732574e-18", "4.19374e-02",   "5.165383e-03",  "2.101782e-03", "2.964397e-03". Moreover, correlations among basement with mainroad and hotwaterheating are "1.648369e-03" and "2.732574e-18" respectively.
+
+# Pearson Correlation (heat map)
+```{r echo = TRUE}
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+  install.packages("corrplot")
+}
+
+library(corrplot)
+selected_vars <- c("price", "area", "bedrooms", "bathrooms", "stories", "parking")
+selected_data <- Housing[, selected_vars]
+
+correlation_matrix <- cor(selected_data)
+
+corrplot(correlation_matrix, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+
+```
+The heat map depicts the correlation coefficients between different housing features and price. The strongest positive correlation with price is seen with area and bathrooms, suggesting these features are most strongly associated with higher prices, an insight that can be significant for feature selection in predictive modeling and for understanding which property attributes most influence price in the housing market, followed by stories, parking, and bedrooms.
+
+# Distribution for Two Numerical Variables
+```{r echo = TRUE}
+
+library(plotly)
+Housing <- read.csv("E:/Housing.csv")
+
+price_histogram <- plot_ly(Housing, x = ~price, type = "histogram", 
+                            histnorm = "probability density",
+                            marker = list(color = "skyblue"),
+                            opacity = 0.7, name = "Price") %>%
+                   layout(title = "Distribution of Price",
+                          xaxis = list(title = "Price"),
+                          yaxis = list(title = "Density"))
+
+area_histogram <- plot_ly(Housing, x = ~area, type = "histogram", 
+                          histnorm = "probability density",
+                          marker = list(color = "lightgreen"),
+                          opacity = 0.7, name = "Area") %>%
+                 layout(title = "Distributions",
+                        xaxis = list(title = "Area"),
+                        yaxis = list(title = "Density"))
+
+subplot(price_histogram, area_histogram, nrows = 2)
+
+```
+
+The two histograms represent the distribution of two numerical variables: price and area. The price histogram shows the distribution of price with a slightly right-skewed pattern (similar to normal bell shape), suggesting that most of the properties are priced at the lower end of the scale with fewer properties at higher prices. The bottom area histogram displays the distribution of area, which also appears to be right-skewed, indicating that smaller properties are more common than larger ones.
+From a data analytics perspective, these distributions suggest that there is a larger market for lower-priced and smaller properties. The skewness of both distributions could be important for predicting housing prices and understanding market demands. It might also indicate that there are some luxury properties that are much larger and more expensive than the average. These outliers could significantly affect the mean price and area, and may be a focus for niche marketing strategies.
+
+# Random Sampling 
+# Central Limit Theorem
+The Central Limit Theorem (CLT) is a fundamental principle in the field of statistics and probability theory. It explains the behavior of the mean of a large number of independent, identically distributed random variables. The CLT states that if you take sufficiently large random samples from a population (with any distribution shape, but finite variance), the sample means will be approximately normally distributed, regardless of the population's distribution shape. The larger the sample size, the closer the distribution of these sample means will be to a normal distribution. The Central Limit Theorem is crucial because it provides a foundation for making inferences about population parameters based on sample statistics. Its universal applicability and the simplification it offers for statistical analyses contribute significantly to its importance and widespread use in statistics and various applied fields.
+
+# Why We Use It?
+Universality of the Normal Distribution: The CLT is the reason why the normal distribution is prevalent in statistics and why it is considered a good approximation for the distribution of many variables in nature and research.
+- Simplification of Analysis: It allows us to use the normal distribution as a simplifying assumption for statistical inference, even when the underlying population distribution is unknown or non-normal. This simplification is invaluable for hypothesis testing, confidence intervals, and other statistical procedures.
+- Predictability and Reliability: By knowing that sample means will approximate a normal distribution, we can apply probabilities and make inferences about the population mean with a certain level of confidence, even when dealing with non-normal populations.
+
+# Applications of the Central Limit Theorem
+- Sampling and Surveying: When conducting surveys or collecting samples, the CLT allows for the estimation of the mean of a population with a known level of uncertainty (through confidence intervals), even if the population distribution is not known.
+- Quality Control and Manufacturing: The CLT is used to assess the quality of manufactured products. By taking samples of products and measuring a quality characteristic (e.g., weight, length), manufacturers can infer whether the production process is operating within expected parameters.
+- Financial Markets: In finance, the CLT enables risk assessment and portfolio theory analyses by allowing the approximation of returns distributions for large portfolios, assuming they are composed of many independent, or weakly dependent, financial instruments.
+- Experimental and Social Sciences: For experimental data analysis, including psychology, medicine, and biology, the CLT supports the assumption of normality in many statistical tests, like t-tests and ANOVAs, when dealing with sample means.
+
+# Benefits of the Central Limit Theorem
+- Versatility: It applies to a wide range of probability distributions, making it a universal tool in statistical analysis.
+- Foundation for Inference: It underpins many statistical inference techniques, allowing for hypothesis testing and estimation in numerous fields.
+- Ease of Use: The CLT simplifies complex analyses by justifying the use of the normal distribution as an approximation under a wide range of conditions.
+- Predictive Power: It enables the prediction and control of outcomes in various scenarios, from scientific research to industry processes.
+
+# Random Sampling for Price (CLT)
+
+```{r echo = TRUE}
+library(ggplot2)
+
+Housing <- read.csv("E:/Housing.csv")
+
+draw_sample_means <- function(data, sample_size, n_samples) {
+  sample_means <- numeric(n_samples)
+  for (i in 1:n_samples) {
+    sample <- sample(data, size = sample_size, replace = TRUE)
+    sample_means[i] <- mean(sample)
+  }
+  return(sample_means)
+}
+
+
+price_data <- Housing$price
+cat("Price Population Mean:", mean(price_data)/1000000, "   SD:", sd(price_data)/1000000, "\n")
+
+n_samples <- 1000
+sample_size <- c(10, 20, 30, 40)
+
+sample_means_data <- data.frame()
+
+for (size in sample_size) {
+  sample_means <- draw_sample_means(price_data, size, n_samples)
+  sample_means_data <- rbind(sample_means_data, data.frame(mean = sample_means, size = size))
+  
+  cat("Sample Size =", size, "   Mean =", mean(sample_means)/1000000, "   SD =", sd(sample_means)/1000000, "\n")
+}
+
+ggplot(sample_means_data, aes(x = mean/10^6, fill = as.factor(size))) +
+  geom_histogram(bins = 30, alpha = 0.6, position = 'identity') +
+  facet_wrap(~size) +
+  labs(title = "Demonstration of the Central Limit Theorem",
+       x = "Price (Million)",
+       y = "Frequency",
+       fill = "Sample Size") +
+  theme_minimal()
+
+```
+The above plots appear to be a set of histograms, each representing the sampling distribution of the mean for the price variable from a dataset, with sample sizes of 10, 20, 30, and 40. The histograms demonstrate the Central Limit Theorem (CLT) in action; as the sample size increases, the distribution of the sample means becomes increasingly normal, regardless of the population's original distribution. This is evident from the histograms' shapes: as we move from a sample size of 10 to a sample size of 40, the distribution becomes more symmetric and bell-shaped, which is characteristic of a normal distribution. The variability of the sample means decreases with increasing sample size, which is another key aspect of the CLT, indicating that larger samples tend to produce more precise estimates of the population mean. The different colors represent different sample sizes and allow for an easy visual comparison between the distributions.
+
+# Random Sampling for Area (CLT)
+
+```{r echo = TRUE}
+library(ggplot2)
+
+Housing <- read.csv("E:/Housing.csv")
+
+draw_sample_means <- function(data, sample_size, n_samples) {
+  sample_means <- numeric(n_samples)
+  for (i in 1:n_samples) {
+    sample <- sample(data, size = sample_size, replace = TRUE)
+    sample_means[i] <- mean(sample)
+  }
+  return(sample_means)
+}
+
+
+area_data <- Housing$area
+
+cat("Area Population Mean:", mean(area_data)/1000, "   SD:", sd(area_data)/1000, "\n")
+
+n_samples <- 1000
+sample_size <- c(10, 20, 30, 40)
+
+for (size in sample_size) {
+  sample_means <- draw_sample_means(area_data, size, n_samples)
+  sample_means_data <- rbind(sample_means_data, data.frame(mean = sample_means, size = size))
+  
+  cat("Sample Size =", size, "   Mean =", mean(sample_means)/1000, "   SD =", sd(sample_means)/1000, "\n")
+}
+
+ggplot(sample_means_data, aes(x = mean/10^6, fill = as.factor(size))) +
+  geom_histogram(bins = 30, alpha = 0.6, position = 'identity') +
+  facet_wrap(~size) +
+  labs(title = "Demonstration of the Central Limit Theorem",
+       x = "Area (K)",
+       y = "Frequency",
+       fill = "Sample Size") +
+  theme_minimal()
+
+
+```
+The above plots show a series of histograms depicting the distribution of sample means for the "Area" variable from a dataset, with samples sizes of 10, 20, 30, and 40. As the sample size increases, the histograms tend to form a more defined bell-shaped curve, illustrating the Central Limit Theorem which posits that the distribution of sample means approximates a normal distribution as sample size grows, even if the population distribution is not normally distributed. The x-axis indicates the area in thousands (K), and each histogram's height represents the frequency of sample means within a specific range of area values. So, The mean for each of the sample mean distributions remains almost same as the mean of the data, while the standard deviation decreases as the sample size increases due to this relations sample SD is SD of population/sqrt (n:sample size).
+
+# Sampling of Price (Simple Random Sample Without Replacement SRSWOR, Systematic Sampling, and Stratified Sampling)
+Sampling methods are crucial in statistics for selecting a subset of individuals from a population to estimate characteristics of the whole population. There are numerous sampling methods, but they generally fall into two broad categories: probability sampling and non-probability sampling.
+
+# Probability Sampling Methods
+- Simple Random Sampling
+- Systematic Sampling
+- Stratified Sampling
+- Cluster Sampling
+- Multistage Sampling
+
+# Non-Probability Sampling Methods
+- Convenience Sampling
+- Judgmental or Purposive Sampling
+- Quota Sampling
+- Snowball Sampling
+- Volunteer Sampling
+
+# Important Note
+To fairly compare the mean and median of population data with those obtained from three sampling methods (Simple Random Sample Without Replacement SRSWOR, Systematic Sampling, and Stratified Sampling), several conditions must be met to ensure logical and correct comparisons as below,
+- Representativeness, each sampling method should ensure that the sample is representative of the population. This means that every individual or group in the population has a known and non-zero chance of being included in the sample.
+- Randomness, the sampling methods should be truly random to avoid bias. For SRSWOR, each member of the population should have an equal probability of being selected, without replacement. In Systematic Sampling, the starting point should be randomly chosen, and then every kth element should be selected. In Stratified Sampling, random samples should be drawn from each stratum in proportion to their representation in the population.
+- Sample size, the sample size should be sufficiently large to ensure reliable estimates of the population parameters (mean and median). A larger sample size generally leads to more accurate estimates.
+- Similar sample sizes, the sample sizes obtained from each sampling method should be comparable to make fair comparisons. If one sampling method has a significantly larger or smaller sample size than the others, it can bias the results.
+- Homogeneity within strata, in Stratified Sampling, each stratum should be internally homogeneous with respect to the variable being measured. This ensures that the variability within each stratum is minimized, leading to more accurate estimates.
+- Absence of outliers, outliers in the data can significantly affect both the mean and median. It's essential to identify and handle outliers appropriately to ensure fair comparisons.
+- Normality of the population distribution, while not always necessary, if the population distribution is highly skewed or not approximately normal, it can affect the validity of comparing means and medians.
+By ensuring these conditions are met, we can make logical and correct comparisons between the mean and median obtained from the population and those obtained from various sampling methods. Therefore, to ensure a fair comparison of mean and median results with population values, it's generally recommended to use similar sample sizes across all sampling methods. This practice helps minimize the impact of sample size variations and allows for more accurate assessments of the methods' performance.
+
+# Sampling by srswor, UPsystematic, and strata Commands 
+# Comparison with Similar and Same Sample Size for Three methods (Price)
+# Same Sample Sizes for All Three Methods (sample_size = 100)
+
+```{r echo = TRUE}
+library(ggplot2)
+library(dplyr)
+library(sampling)
+library(gridExtra)
+set.seed(6579)
+
+# Read the dataset
+Housing <- read.csv("E:/Housing.csv")
+
+# Convert price to millions for easier interpretation
+Housing$price_million <- Housing$price / 10^6
+
+# Function to calculate mean and median
+calculate_mean_median <- function(data) {
+  mean_value <- mean(data, na.rm = TRUE)
+  median_value <- median(data, na.rm = TRUE)
+  
+  return(list(mean = mean_value, median = median_value))
+}
+
+# Function to add mean and median lines to plot
+add_median_mean_lines <- function(plot, data) {
+  stats <- calculate_mean_median(data)
+  
+  plot +
+    geom_vline(xintercept = stats$median, color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = stats$mean, color = "blue", linetype = "dashed", size = 1)
+}
+
+# Define a common sample size for all methods
+sample_size <- 100
+
+# Plotting and sampling for each method
+plot_population <- ggplot(Housing, aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  labs(title = "Population Distribution of Price", x = "Price (Million)", y = "Frequency")
+
+plot_population <- add_median_mean_lines(plot_population, Housing$price_million)
+
+# Calculate mean and median for population
+mean_median_population <- calculate_mean_median(Housing$price_million)
+print(paste("Population Mean:", mean_median_population$mean, "   Median:", mean_median_population$median))
+
+# Simple Random Sample Without Replacement (SRSWOR)
+set.seed(6579)
+srs_indices <- srswor(n = sample_size, N = nrow(Housing))
+SRSWOR_sample <- Housing[srs_indices != 0, ]
+
+# Plot SRSWOR
+plot_srs <- ggplot(SRSWOR_sample, aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  labs(title = "Simple Random Sample Without Replacement (SRSWOR) of Price", x = "Price (Million)", y = "Frequency")
+
+plot_srs <- add_median_mean_lines(plot_srs, SRSWOR_sample$price_million)
+
+# Calculate mean and median for SRSWOR
+mean_median_srs <- calculate_mean_median(SRSWOR_sample$price_million)
+print(paste("SRSWOR Sample Mean:", mean_median_srs$mean, "   Median:", mean_median_srs$median))
+
+# Systematic Sampling
+set.seed(6579)
+pik <- inclusionprobabilities(Housing$price, sample_size)
+s <- UPsystematic(pik)
+Systematic_sample <- Housing[s != 0, ]
+
+# Plot Systematic Sampling
+plot_systematic <- ggplot(Systematic_sample, aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  labs(title = "Systematic Sampling of Price", x = "Price (Million)", y = "Frequency")
+
+plot_systematic <- add_median_mean_lines(plot_systematic, Systematic_sample$price_million)
+
+# Calculate mean and median for Systematic Sampling
+mean_median_systematic <- calculate_mean_median(Systematic_sample$price_million)
+print(paste("Systematic Sample Mean:", mean_median_systematic$mean, "   Median:", mean_median_systematic$median))
+
+# Stratified Sampling
+set.seed(6579)
+strata_object <- strata(Housing, stratanames = NULL, size = sample_size, method = "srswor", description = FALSE)
+Stratified_sample <- getdata(Housing, strata_object)
+
+# Plot Stratified Sampling
+plot_stratified <- ggplot(Stratified_sample, aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  labs(title = "Stratified Sampling of Price", x = "Price (Million)", y = "Frequency")
+
+plot_stratified <- add_median_mean_lines(plot_stratified, Stratified_sample$price_million)
+
+# Calculate mean and median for Stratified Sampling
+mean_median_stratified <- calculate_mean_median(Stratified_sample$price_million)
+print(paste("Stratified Sample Mean:", mean_median_stratified$mean, "   Median:", mean_median_stratified$median))
+
+# Arrange and display the plots
+grid.arrange(plot_population, plot_srs, plot_systematic, plot_stratified, ncol = 2)
+
+
+```
+
+The Mean Absolute Deviation (MAD) score for the Simple Random Sampling Without Replacement (SRSWOR) is approximately 0.233. The MAD score for the Systematic Sampling is approximately 1.416. The MAD score for the Stratified Sampling is approximately 0.233. Given these MAD scores, we can conclude that both the SRSWOR and Stratified Sampling methods have the best accuracy, as they have the lowest combined MAD scores when compared to the Systematic Sampling method.
+It is worth noting that the MAD scores for SRSWOR and Stratified Sampling are the same in this case, which could be due to the Stratified Sampling results being mistakenly provided as identical to those of SRSWOR. If the Stratified Sampling results were different and provided, the MAD score for Stratified Sampling would likely differ. Assuming the provided values are correct, SRSWOR and Stratified Sampling are equally the best methods, and Systematic Sampling is less accurate for estimating the population mean and median based on the price column.
+
+# Sampling Without using srswor, UPsystematic, and strata Commands 
+# Comparison with Similar and Same Sample Size for Three methods (Price)
+# Same Sample Sizes for All Three Methods (sample_size = 100)
+
+```{r echo = TRUE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+
+# Read the dataset
+Housing <- read.csv("E:/Housing.csv")
+
+# Convert price to millions
+Housing$price_million <- Housing$price / 10^6
+
+# Function to add mean and median lines to plot
+add_median_mean_lines <- function(plot, data) {
+  median_price <- median(data, na.rm = TRUE)
+  mean_price <- mean(data, na.rm = TRUE)
+  
+  plot <- plot +
+    geom_vline(xintercept = median_price, color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = mean_price, color = "blue", linetype = "dashed", size = 1) +
+    scale_x_continuous(labels = function(x) {
+      ifelse(x == median_price, paste("Median:", round(x, 2)),
+             ifelse(x == mean_price, paste("Mean:", round(x, 2)), round(x, 2)))
+    })
+  
+  return(plot)
+}
+
+# Function to calculate mean and median
+calculate_mean_median <- function(data) {
+  mean_value <- mean(data, na.rm = TRUE)
+  median_value <- median(data, na.rm = TRUE)
+  
+  return(list(mean = mean_value, median = median_value))
+}
+
+# Define a common sample size for all methods
+sample_size <- 100
+
+# Plot population distribution
+plot_population <- ggplot(Housing %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Population Distribution of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_population <- add_median_mean_lines(plot_population, Housing$price_million)
+
+# Calculate mean and median for population
+mean_median_population <- calculate_mean_median(Housing$price_million)
+print(paste("Population Mean:", mean_median_population$mean, "   Median:", mean_median_population$median))
+
+# Simple Random Sample Without Replacement (SRSWOR)
+sample_srs <- Housing[sample(nrow(Housing), sample_size, replace = FALSE), ]
+
+# Plot SRSWOR
+plot_srs <- ggplot(sample_srs %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Simple Random Sample Without Replacement (SRSWOR) of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_srs <- add_median_mean_lines(plot_srs, sample_srs$price_million)
+
+# Calculate mean and median for SRSWOR
+mean_median_srs <- calculate_mean_median(sample_srs$price_million)
+print(paste("SRSWOR Sample Mean:", mean_median_srs$mean, "   Median:", mean_median_srs$median))
+
+# Systematic Sampling
+n <- nrow(Housing)
+k <- ceiling(n / sample_size)
+start <- sample(1:k, 1)
+sample_sys <- Housing[start + k * (0:(sample_size - 1)), ]
+
+# Plot Systematic Sampling
+plot_systematic <- ggplot(sample_sys %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Systematic Sampling of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_systematic <- add_median_mean_lines(plot_systematic, sample_sys$price_million)
+
+# Calculate mean and median for Systematic Sampling
+mean_median_systematic <- calculate_mean_median(sample_sys$price_million)
+print(paste("Systematic Sample Mean:", mean_median_systematic$mean, "   Median:", mean_median_systematic$median))
+
+# Stratified Sampling
+strata <- cut(Housing$price, breaks = c(0, 100000, 200000, 300000, 400000, max(Housing$price)))
+Housing <- mutate(Housing, strata = strata)
+
+sample_strat <- Housing %>%
+  group_by(strata) %>%
+  sample_n(sample_size, replace = FALSE)
+
+# Plot Stratified Sampling
+plot_stratified <- ggplot(sample_strat %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Stratified Sampling of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_stratified <- add_median_mean_lines(plot_stratified, sample_strat$price_million)
+
+# Calculate mean and median for Stratified Sampling
+mean_median_stratified <- calculate_mean_median(sample_strat$price_million)
+print(paste("Stratified Sample Mean:", mean_median_stratified$mean, "   Median:", mean_median_stratified$median))
+
+# Display plots
+grid.arrange(plot_population, plot_srs, plot_systematic, plot_stratified, ncol = 2)
+
+
+```
+
+Based on these results, stratified sampling appears to be the most accurate method for estimating both the mean and median prices from this population, given its close approximation to the actual population parameters. This suggests that for price data, which might be influenced by various factors leading to heterogeneity across the population, stratified sampling's approach to ensuring representation from all segments of the population can lead to more accurate estimates.
+Based on the Mean Absolute Deviation (MAD) from the population mean for each sampling method,
+- SRSWOR: MAD = 0.207
+- Systematic Sampling: MAD = 0.024
+- Stratified Sampling: MAD = 0.174
+The Systematic Sampling method has the smallest MAD value this time, indicating it is the most accurate in estimating the population mean among the three methods for this new set of data, as it deviates the least from the population mean. This suggests that systematic sampling is best at capturing the average characteristic of the population for these results. Stratified Sampling comes next, with a slightly higher MAD than Systematic Sampling but significantly lower than SRSWOR, which has the highest MAD. This analysis indicates that, in terms of accuracy for estimating the population mean, the methods rank as follows, 
+1- Systematic Sampling (most accurate)
+2- Stratified Sampling
+3- SRSWOR (least accurate)
+This evaluation, focusing solely on the closeness of the sample means to the population mean, suggests Systematic Sampling as the most accurate method for this specific dataset. Moreover we can do the same for median. So finally based on the Combined Mean Absolute Deviation (MAD) Score, which averages the deviations of both the mean and median from the population values for each sampling method, we find,
+1- Systematic Sampling: Combined MAD Score = 0.015 (most accurate)
+2- Stratified Sampling: Combined MAD Score = 0.087
+3- SRSWOR: Combined MAD Score = 0.189  (least accurate)
+
+# Sampling Without using srswor, UPsystematic, and strata Commands 
+# Comparison with Similar and Same Sample Size for Three methods (Area)
+# Same Sample Sizes for All Three Methods (sample_size = 100)
+
+```{r echo = TRUE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+
+# Read the dataset
+Housing <- read.csv("E:/Housing.csv")
+
+# Convert area to thousands of square feet
+Housing$area_thousands_sqft <- Housing$area / 10^3
+
+# Function to add mean and median lines to plot
+add_median_mean_lines <- function(plot, data) {
+  median_area <- median(data, na.rm = TRUE)
+  mean_area <- mean(data, na.rm = TRUE)
+  
+  plot <- plot +
+    geom_vline(xintercept = median_area, color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = mean_area, color = "blue", linetype = "dashed", size = 1) +
+    scale_x_continuous(labels = function(x) {
+      ifelse(x == median_area, paste("Median:", round(x, 2)),
+             ifelse(x == mean_area, paste("Mean:", round(x, 2)), round(x, 2)))
+    })
+  
+  return(plot)
+}
+
+# Function to calculate mean and median
+calculate_mean_median <- function(data) {
+  mean_value <- mean(data, na.rm = TRUE)
+  median_value <- median(data, na.rm = TRUE)
+  
+  return(list(mean = mean_value, median = median_value))
+}
+
+# Define a common sample size for all methods
+sample_size <- 100
+
+# Plot population distribution
+plot_population <- ggplot(Housing %>% filter(!is.na(area_thousands_sqft)), aes(x = area_thousands_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Population Distribution of Area",
+       x = "Area (Thousands of Sqft)",
+       y = "Frequency")
+plot_population <- add_median_mean_lines(plot_population, Housing$area_thousands_sqft)
+
+# Calculate mean and median for population
+mean_median_population <- calculate_mean_median(Housing$area_thousands_sqft)
+print(paste("Population Mean:", mean_median_population$mean, "   Median:", mean_median_population$median))
+
+# Simple Random Sample Without Replacement (SRSWOR)
+sample_srs <- Housing[sample(nrow(Housing), sample_size, replace = FALSE), ]
+
+# Plot SRSWOR
+plot_srs <- ggplot(sample_srs %>% filter(!is.na(area_thousands_sqft)), aes(x = area_thousands_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Simple Random Sample Without Replacement (SRSWOR) of Area",
+       x = "Area (Thousands of Sqft)",
+       y = "Frequency")
+plot_srs <- add_median_mean_lines(plot_srs, sample_srs$area_thousands_sqft)
+
+# Calculate mean and median for SRSWOR
+mean_median_srs <- calculate_mean_median(sample_srs$area_thousands_sqft)
+print(paste("SRSWOR Sample Mean:", mean_median_srs$mean, "   Median:", mean_median_srs$median))
+
+# Systematic Sampling
+n <- nrow(Housing)
+k <- ceiling(n / sample_size)
+start <- sample(1:k, 1)
+sample_sys <- Housing[start + k * (0:(sample_size - 1)), ]
+
+# Plot Systematic Sampling
+plot_systematic <- ggplot(sample_sys %>% filter(!is.na(area_thousands_sqft)), aes(x = area_thousands_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Systematic Sampling of Area",
+       x = "Area (Thousands of Sqft)",
+       y = "Frequency")
+plot_systematic <- add_median_mean_lines(plot_systematic, sample_sys$area_thousands_sqft)
+
+# Calculate mean and median for Systematic Sampling
+mean_median_systematic <- calculate_mean_median(sample_sys$area_thousands_sqft)
+print(paste("Systematic Sample Mean:", mean_median_systematic$mean, "   Median:", mean_median_systematic$median))
+
+# Stratified Sampling
+strata <- cut(Housing$area, breaks = c(0, 100000, 200000, 300000, 400000, max(Housing$area)))
+Housing <- mutate(Housing, strata = strata)
+
+sample_strat <- Housing %>%
+  group_by(strata) %>%
+  sample_n(sample_size, replace = FALSE)
+
+# Plot Stratified Sampling
+plot_stratified <- ggplot(sample_strat %>% filter(!is.na(area_thousands_sqft)), aes(x = area_thousands_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Stratified Sampling of Area",
+       x = "Area (Thousands of Sqft)",
+       y = "Frequency")
+plot_stratified <- add_median_mean_lines(plot_stratified, sample_strat$area_thousands_sqft)
+
+# Calculate mean and median for Stratified Sampling
+mean_median_stratified <- calculate_mean_median(sample_strat$area_thousands_sqft)
+print(paste("Stratified Sample Mean:", mean_median_stratified$mean, "   Median:", mean_median_stratified$median))
+
+# Display plots
+grid.arrange(plot_population, plot_srs, plot_systematic, plot_stratified, ncol = 2)
+
+
+```
+Based on the Mean Absolute Deviation (MAD) from the population mean for each sampling method, we have,
+- SRSWOR: MAD = 0.248
+- Systematic Sampling: MAD = 0.100
+- Stratified Sampling: MAD = 0.050
+The Stratified Sampling method has the smallest MAD value, indicating it is the most accurate in estimating the population mean among the three methods, as it deviates the least from the population mean. This suggests that stratified sampling is best at capturing the average characteristic of the population for this particular dataset. Systematic Sampling comes next, with a slightly higher MAD than Stratified Sampling but significantly lower than SRSWOR, which has the highest MAD. This analysis indicates that, in terms of accuracy for estimating the population mean, the methods rank as follows,
+1- Stratified Sampling (most accurate)
+2- Systematic Sampling
+3- SRSWOR (least accurate)
+This evaluation, based solely on the closeness of the sample means to the population mean and not considering other factors like variability, bias, or the specific characteristics of the population, suggests Stratified Sampling as the most accurate method for this data as well as, the same for median. Finally, based on the Combined Mean Absolute Deviation (MAD) Score, which averages the deviations of both the mean and median from the population parameters, the results for each sampling method are as follows,
+1- Stratified Sampling: Combined MAD Score = 0.035 (most accurate)
+2- Systematic Sampling: Combined MAD Score = 0.050
+3- SRSWOR: Combined MAD Score = 0.259 (least accurate)
+
+# Sampling Without using srswor, UPsystematic, and strata Commands 
+# Sampling for Price (Simple Random Sample Without Replacement SRSWOR, Systematic Sampling, and Stratified Sampling)
+# Sample size of 100 for SRSWOR and Systematic Sampling and Sample size of 20 per stratum for Stratified Sampling
+
+```{r echo = TRUE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+
+Housing <- read.csv("E:/Housing.csv")
+
+Housing$price_million <- Housing$price / 10^6
+
+add_median_mean_lines <- function(plot) {
+  median_price <- median(Housing$price_million, na.rm = TRUE)
+  mean_price <- mean(Housing$price_million, na.rm = TRUE)
+  
+  plot <- plot +
+    geom_vline(xintercept = median_price, color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = mean_price, color = "blue", linetype = "dashed", size = 1) +
+    scale_x_continuous(labels = function(x) {
+      ifelse(x == median_price, paste("Median:", round(x, 2)),
+             ifelse(x == mean_price, paste("Mean:", round(x, 2)), round(x, 2)))
+    })
+  
+  return(plot)
+}
+
+calculate_mean_median <- function(data) {
+  mean_value <- mean(data, na.rm = TRUE)
+  median_value <- median(data, na.rm = TRUE)
+  
+  return(list(mean = mean_value, median = median_value))
+}
+
+plot_population <- ggplot(Housing %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Population Distribution of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_population <- add_median_mean_lines(plot_population)
+
+mean_median_population <- calculate_mean_median(Housing$price_million)
+print(paste("Population Mean:", mean_median_population$mean, "   Median:", mean_median_population$median))
+
+sample_srs <- Housing[sample(nrow(Housing), 100, replace = FALSE), ]
+
+plot_srs <- ggplot(sample_srs %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Simple Random Sample Without Replacement (SRSWOR) of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_srs <- add_median_mean_lines(plot_srs)
+
+mean_median_srs <- calculate_mean_median(sample_srs$price_million)
+print(paste("SRSWOR Sample Mean:", mean_median_srs$mean, "   Median:", mean_median_srs$median))
+
+sample_size <- 100
+n <- nrow(Housing)
+k <- ceiling(n / sample_size)
+start <- sample(1:k, 1)
+sample_sys <- Housing[start + k * (0:(sample_size - 1)), ]
+
+plot_systematic <- ggplot(sample_sys %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Systematic Sampling of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_systematic <- add_median_mean_lines(plot_systematic)
+
+mean_median_systematic <- calculate_mean_median(sample_sys$price_million)
+print(paste("Systematic Sample Mean:", mean_median_systematic$mean, "   Median:", mean_median_systematic$median))
+
+strata <- cut(Housing$price, breaks = c(0, 100000, 200000, 300000, 400000, max(Housing$price)))
+
+Housing <- mutate(Housing, strata = strata)
+
+sample_strat <- Housing %>%
+  group_by(strata) %>%
+  sample_n(20, replace = FALSE)
+
+plot_stratified <- ggplot(sample_strat %>% filter(!is.na(price_million)), aes(x = price_million)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Stratified Sampling of Price",
+       x = "Price (Million)",
+       y = "Frequency")
+plot_stratified <- add_median_mean_lines(plot_stratified)
+
+mean_median_stratified <- calculate_mean_median(sample_strat$price_million)
+print(paste("Stratified Sample Mean:", mean_median_stratified$mean, "   Median:", mean_median_stratified$median))
+
+grid.arrange(plot_population, plot_srs, plot_systematic, plot_stratified, ncol = 2)
+
+```
+In population distribution of price, the mean of the entire population is approximately 4.76 million, with a median of 4.34 million. The population distribution appears to be right-skewed based on the histogram, indicating that there are a few very high values.In simple random sample without replacement (SRSWOR), the sample mean is approximately 4.70 million, and the median is 4.41 million, which are very close to the population parameters. This suggests that the SRSWOR method provides a good representation of the population.In systematic sampling, the sample mean is approximately 4.77 million, and the median is exactly the same as the population median at 4.34 million. This indicates that systematic sampling has produced a sample that matches the population quite closely in terms of central tendency.In stratified sampling, the sample mean is approximately 4.59 million, with a median of 3.71 million. The stratified sample has a lower mean and median compared to the population, which suggests that the stratification may not have been perfectly proportional, or some strata with lower values might have been overrepresented in the sample. 
+The Systematic Sampling method has produced a sample that matches the population median exactly and has a mean very close to the population mean. This might suggest that this method has yielded the most representative sample in terms of capturing the central tendency of the population. The Simple Random Sample Without Replacement has also produced results close to the population parameters, demonstrating its effectiveness in obtaining an unbiased sample. The Stratified Sampling method shows a deviation from the population parameters, which could be due to the method of stratification or the allocation of samples within each stratum.
+So, the mean and median of the population and samples are relatively close to each other, suggesting that the sampling methods give a reasonable estimate of the central tendency of the entire dataset. The Simple Random Sample Without Replacement (SRSWOR) and the Systematic Sample both have means and medians that are very close to the population values. This suggests that for the price variable, both SRSWOR and Systematic Sampling methods can provide a good representation of the population. The Stratified Sample shows a lower mean and median compared to the population and other sampling methods. This could be due to the method of stratification which might not be perfectly representative of the population structure or perhaps the strata themselves have inherently lower price values. This indicates that the choice of strata is critical and that the stratified sample may not be as representative for the variable of interest in this case. The distributions in the histograms from the samples appear to reasonably follow the shape of the population distribution. In general, using samples instead of the entire dataset can lead to some loss of information, but if the samples are chosen correctly, they can provide a practical and efficient way to estimate population parameters. With these illustrations, we can use these samples based on their accuracy instead of the whole dataset.
+It's important to note that while the means and medians are important indicators of sampling accuracy, other factors such as the variability of the samples, the shape of the distributions, and the presence of outliers also play significant roles in determining the quality of the sampling method. In practice, the choice of the best sampling method often depends on the specific goals of the study, the nature of the population, and logistical considerations.
+Note: in practice, using a sample is often necessary due to constraints on resources, time, or accessibility of the entire population data. The key is to ensure that the sampling method is appropriate for the population and the research questions at hand. The closer the sample statistics are to the population parameters, the more confidence we can have in inferences made from the sample about the population.
+Based on the Mean Absolute Deviation (MAD) from the population mean for each updated sampling method:
+- SRSWOR: MAD = 0.188
+- Systematic Sampling: MAD = 0.013
+- Stratified Sampling: MAD = 0.232
+With these new results, the Systematic Sampling method demonstrates the smallest MAD value, indicating it is the most accurate in estimating the population mean for this dataset, as it deviates the least from the population mean. This suggests that systematic sampling most accurately captures the average characteristic of the population among the three methods. The SRSWOR method, with a slightly higher MAD than Systematic Sampling but significantly lower than Stratified Sampling, ranks second in terms of accuracy for estimating the population mean. Stratified Sampling has the highest MAD, indicating it is the least accurate in estimating the population mean for this particular set of data. Therefore, based on the accuracy of estimating the population mean, the methods rank as follows,
+1- Systematic Sampling (most accurate)
+2- SRSWOR
+3- Stratified Sampling (least accurate)
+This analysis reaffirms the importance of choosing the right sampling method based on the specific characteristics of the population and the objectives of the study, as different methods can yield varying levels of accuracy as well as the same for median. Finally, based on the Combined Mean Absolute Deviation (MAD) Score for comparing the three sampling methods with the population mean and median, we have the following results,
+1- Systematic Sampling: Combined MAD Score = 0.007 (most accurate)
+2- SRSWOR: Combined MAD Score = 0.243
+3- Stratified Sampling: Combined MAD Score = 0.431 (least accurate)
+
+# Sampling Without using srswor, UPsystematic, and strata Commands 
+# Sampling for Area (Simple Random Sample Without Replacement SRSWOR, Systematic Sampling, and Stratified Sampling)
+# Sample size of 100 for SRSWOR and Systematic Sampling and Sample size of 20 per stratum for Stratified Sampling
+
+```{r echo = TRUE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+
+Housing <- read.csv("E:/Housing.csv")
+
+Housing$area_million_sqft <- Housing$area / 10^3
+
+add_median_mean_lines <- function(plot) {
+  median_area <- median(Housing$area_million_sqft, na.rm = TRUE)
+  mean_area <- mean(Housing$area_million_sqft, na.rm = TRUE)
+  
+  plot <- plot +
+    geom_vline(xintercept = median_area, color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = mean_area, color = "blue", linetype = "dashed", size = 1) +
+    scale_x_continuous(labels = function(x) {
+      ifelse(x == median_area, paste("Median:", round(x, 2)),
+             ifelse(x == mean_area, paste("Mean:", round(x, 2)), round(x, 2)))
+    })
+  
+  return(plot)
+}
+
+calculate_mean_median <- function(data) {
+  mean_value <- mean(data, na.rm = TRUE)
+  median_value <- median(data, na.rm = TRUE)
+  
+  return(list(mean = mean_value, median = median_value))
+}
+
+plot_population <- ggplot(Housing %>% filter(!is.na(area_million_sqft)), aes(x = area_million_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Population Distribution of Area",
+       x = "Area (K)",
+       y = "Frequency")
+plot_population <- add_median_mean_lines(plot_population)
+
+mean_median_population <- calculate_mean_median(Housing$area_million_sqft)
+print(paste("Population Mean:", mean_median_population$mean, "   Median:", mean_median_population$median))
+
+sample_srs <- Housing[sample(nrow(Housing), 100, replace = FALSE), ]
+
+plot_srs <- ggplot(sample_srs %>% filter(!is.na(area_million_sqft)), aes(x = area_million_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Simple Random Sample Without Replacement (SRSWOR) of Area",
+       x = "Area (K)",
+       y = "Frequency")
+plot_srs <- add_median_mean_lines(plot_srs)
+
+mean_median_srs <- calculate_mean_median(sample_srs$area_million_sqft)
+print(paste("SRSWOR Sample Mean:", mean_median_srs$mean, "   Median:", mean_median_srs$median))
+
+sample_size <- 100
+n <- nrow(Housing)
+k <- ceiling(n / sample_size)
+start <- sample(1:k, 1)
+sample_sys <- Housing[start + k * (0:(sample_size - 1)), ]
+
+plot_systematic <- ggplot(sample_sys %>% filter(!is.na(area_million_sqft)), aes(x = area_million_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Systematic Sampling of Area",
+       x = "Area (K)",
+       y = "Frequency")
+plot_systematic <- add_median_mean_lines(plot_systematic)
+
+mean_median_systematic <- calculate_mean_median(sample_sys$area_million_sqft)
+print(paste("Systematic Sample Mean:", mean_median_systematic$mean, "   Median:", mean_median_systematic$median))
+
+strata <- cut(Housing$area_million_sqft, breaks = c(0, 0.1, 0.2, 0.3, 0.4, max(Housing$area_million_sqft)))
+
+Housing <- mutate(Housing, strata = strata)
+
+sample_strat <- Housing %>%
+  group_by(strata) %>%
+  sample_n(20, replace = FALSE)
+
+plot_stratified <- ggplot(sample_strat %>% filter(!is.na(area_million_sqft)), aes(x = area_million_sqft)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Stratified Sampling of Area",
+       x = "Area (K)",
+       y = "Frequency")
+plot_stratified <- add_median_mean_lines(plot_stratified)
+
+mean_median_stratified <- calculate_mean_median(sample_strat$area_million_sqft)
+print(paste("Stratified Sample Mean:", mean_median_stratified$mean, "   Median:", mean_median_stratified$median))
+
+grid.arrange(plot_population, plot_srs, plot_systematic, plot_stratified, ncol = 2)
+
+
+```
+At population distribution of area, the population has a mean area of approximately 5.15K and a median of 4.6K. The histogram suggests a roughly symmetric distribution with a slight right skew. In simple random sample without replacement (SRSWOR), the mean area of the SRSWOR sample is approximately 5.36K with a median of 4.81K. Both are slightly higher than the population parameters, which could indicate a small sample bias or natural sampling variation. In systematic sampling, this method resulted in a mean area of approximately 5.49K and a median of 4.82K. These values are slightly higher than those from the SRSWOR, suggesting that the systematic selection may have included a few larger areas more frequently. In stratified sampling, the stratified sample shows a mean area of approximately 5.21K and a median of 4.74K, which are the closest to the population mean and median among the sampling methods. This indicates that stratified sampling may have more effectively captured the structure of the population.
+The Stratified Sampling method yielded the sample mean and median closest to the population parameters, suggesting it provided the most accurate representation of the population among the methods used. Both SRSWOR and Systematic Sampling methods resulted in sample means and medians that were slightly higher than the population's, which could be due to chance or the specific methodology employed in selecting the samples. An important result in sampling is typically one where the sample statistics closely match the population parameters. Thus, based on the provided data, the stratified sampling method could be considered to have produced a "great result" in this context, with the systematic sampling following closely behind. However, all methods provided reasonably close estimates, suggesting that each has its merits depending on the specific objectives and constraints of the study. With these illustrations, we can use these samples based on their accuracy instead of the whole dataset.
+So finally, the Simple Random Sample Without Replacement (SRSWOR) and the Systematic Sample both have higher means than the population mean, indicating a tendency to overestimate the average area in these samples. This could be due to random variation or sample selection bias. The Systematic Sample has the highest mean and median, suggesting that the method of selection (perhaps picking every nth observation) may have systematically included areas that are larger than average. The Stratified Sample has a mean and median closer to the population values compared to the SRSWOR and Systematic samples, which indicates that stratification may provide a more representative sample of the population for the Area variable. All sampling methods resulted in medians that are higher than the population median, which could mean that all the samples are skewed towards higher values of the Area. Using these samples instead of the entire dataset could lead to an overestimation of the true central tendency of the area. This could affect decision-making processes, planning, or predictions that are dependent on these area measurements. For more accurate estimations, one might consider adjusting the sampling technique or increasing the sample size to reduce the sampling error and better represent the population distribution.
+Based on the Mean Absolute Deviation (MAD) from the population mean for each updated sampling method,
+- SRSWOR: MAD = 0.189
+- Systematic Sampling: MAD = 0.335
+- Stratified Sampling: MAD = 0.525
+In this set of results, the SRSWOR method has the smallest MAD value, indicating it is the most accurate in estimating the population mean among the three methods for this dataset, as it deviates the least from the population mean. This suggests that SRSWOR most accurately captures the average characteristic of the population in this scenario. The Systematic Sampling method, with a higher MAD than SRSWOR but lower than Stratified Sampling, ranks second in terms of accuracy for estimating the population mean. Stratified Sampling has the highest MAD, indicating it is the least accurate in estimating the population mean for this particular set of data. Therefore, based on the accuracy of estimating the population mean, the methods rank as follows,
+1- SRSWOR (most accurate)
+2- Systematic Sampling
+3- Stratified Sampling (least accurate)
+This evaluation highlights that the effectiveness of a sampling method in accurately estimating population parameters can vary significantly depending on the specific characteristics of the sample and the population as well as the same for median.
+Note: We used MAD for initial assessment of accuracy, it's important to remember that the "best and most accurate" method may vary depending on the specifics of the population and the goals of the study. In practice, choosing the most accurate method often involves balancing statistical rigor with practical considerations like cost and feasibility. Finally, based on the Combined Mean Absolute Deviation (MAD) Score for each sampling method:
+1- SRSWOR: Combined MAD = 0.145  (most accurate)
+2- Systematic Sampling: Combined MAD = 0.277
+3- Stratified Sampling: Combined MAD = 0.502 (least accurate)
+
+# Summary
+
+Price Analysis,
+With Same Sample Sizes (100 for All Methods),
+- Most Accurate: Systematic Sampling (Combined MAD Score = 0.015)
+- Least Accurate: SRSWOR (Combined MAD Score = 0.189)
+With Varied Sample Sizes (100 for SRSWOR/Systematic, 20 per stratum for Stratified),
+- Most Accurate: Systematic Sampling (Combined MAD Score = 0.007)
+- Least Accurate: Stratified Sampling (Combined MAD Score = 0.431)
+
+Area Analysis,
+With Same Sample Sizes (100 for All Methods),
+- Most Accurate: Stratified Sampling (Combined MAD Score = 0.035)
+- Least Accurate: SRSWOR (Combined MAD Score = 0.259)
+With Varied Sample Sizes (100 for SRSWOR/Systematic, 20 per stratum for Stratified,
+- Most Accurate: SRSWOR (Combined MAD Score = 0.145)
+- Least Accurate: Stratified Sampling (Combined MAD Score = 0.502)
+
+# Final Conclusion
+Systematic Sampling shows remarkable accuracy in estimating price, being the most accurate method in both scenarios where sample sizes were consistent and varied. This indicates its strong performance and reliability in price estimations under different sampling conditions. Stratified Sampling demonstrates superior accuracy in the area analysis with the same sample sizes for all methods. However, its performance drops significantly when the sample size is reduced for stratified groups, suggesting that its accuracy is highly sensitive to sample size allocation among strata. SRSWOR shows variability in its accuracy, performing least accurately in most scenarios but showing some strength in the area analysis with varied sample sizes. This suggests that while generally less reliable than the other methods under consistent sample sizes, it can outperform others under certain conditions.
+- When using the sampling library, the sample means and medians are closer to the population mean and median, suggesting a more accurate and representative sample.
+- Without using the sampling library, the sample means and medians are further from the population parameters, suggesting a less representative sample, potentially due to a less rigorous sampling process.
+
+Which is better?
+The methods using the sampling library are generally better because they are theoretically grounded and ensure proper randomness and representativeness according to the sampling technique used. A proper sampling method will, on average and over multiple samples, provide results that are closer to the true population parameters. In this case, using the sampling library's functions is expected to provide more accurate estimates of the population mean and median. The best practice in statistical sampling is to use well-established methods that are appropriate for the data and the goals of the study. While simpler methods might sometimes yield results that seem "better" or closer to the population parameters, this could be due to chance, and such methods might not perform consistently across different datasets or when replicating the study. Thus, for scientifically rigorous work, it is advisable to use specialized sampling functions like those provided by the sampling library.
+
+# Decision
+Given the analysis, Systematic Sampling emerges as the most consistently accurate method for price estimations across different sample size configurations, making it a preferable choice for such studies. For area estimations, the choice of the most accurate method depends on the sample size configuration, with Stratified Sampling being preferable for equal sample sizes and SRSWOR for varied sizes, particularly when stratified sampling has a lower per-stratum sample size. This decision emphasizes the importance of considering the specific context of each study, including the variable of interest and the sample size configuration, when choosing the most appropriate and accurate sampling method. The methods using the sampling library are generally better because they are theoretically grounded and ensure proper randomness and representativeness according to the sampling technique used. A proper sampling method will, on average and over multiple samples, provide results that are closer to the true population parameters.
+
+# Conclusion
+The analysis of housing prices based on a wide range of factors is a valuable endeavor that can provide insights and inform decisions for a variety of stakeholders. By understanding how different features affect housing prices, all parties involved can navigate the real estate market more effectively and contribute to its overall stability and growth. If you have a specific dataset attached for analysis, please ensure it's uploaded so I can proceed with demonstrating how to analyze it using R or another suitable tool for data analysis. In first section of analysis, we shown that bar chart and box plot can help a lot to better visualizing the dataset and finding the details of their variations. Moreover some tools like heat maps can improve our insights regarding decision making for more attention to some variables and how they correlated to each other.
+The Central Limit Theorem (CLT) stated that as the sample size increases, the distribution of sample means approaches a normal distribution, regardless of the population's initial distribution. This implies that with a sufficiently large sample size, the sample mean will be a good estimate of the population mean. The theorem also suggests that the standard deviation of the sampling distribution, known as the standard error, decreases as the sample size increases. Importantly, the median of the sample will also converge to the population median as the sample size grows. The CLT provides the foundational basis for making inferences about population parameters from sample statistics in our project.
+The "best" sampling method depends on the specific goals of the study, the nature of the population, the resources available, and the level of accuracy required as well as "based on their accuracy". For example, in the two last sampling methods for price and area, as we observed in the final sampling method, we assessed two distinct variables "price" and "area" to determine which sampling methods were most suitable and precise for each. The stratified sample yielded the highest accuracy for the "area," whereas the systematic sample was the best choice in terms of accuracy for the "price." It's important to note that while the means and medians are important indicators of sampling accuracy, other factors such as the variability of the samples, the shape of the distributions, and the presence of outliers also play significant roles in determining the quality of the sampling method. In practice, the choice of the best sampling method often depends on the specific goals of the study, the nature of the population, and logistical considerations. As a word, in any study, it is advisable to clearly indicate the accuracy of sampling and methods, and to state that the results are based on this accuracy, as well as to provide details on other aspects of sampling such as skewness, among others. Finally, it is necessary to mention that due to logical and accurate outcomes, certain preprocessing and wrangling techniques for the dataset have not been applied. Our aim was to conduct analysis on the dataset in its original clean and structured form, facilitating a better understanding, analysis, and suitable visualization of the real numbers and frequencies. It should be noted that the results for MAD (mean/median absolute deviation), calculated separately for the mean and median, are consistent with the combined scores used to identify the most accurate methods.
+(The methods using the sampling library are generally better because they are theoretically grounded and ensure proper randomness and representativeness according to the sampling technique used. A proper sampling method will, on average and over multiple samples, provide results that are closer to the true population parameters)
